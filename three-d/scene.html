@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>三维美食街 - 校园美食中心</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: "Microsoft YaHei", sans-serif; 
+      overflow: hidden; 
+      background: linear-gradient(135deg, #87ceeb 0%, #e0f6ff 100%);
+    }
+    #scene-container {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(135deg, #ff6b35, #ff8c42);
+      color: white;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(255, 107, 53, 0.3);
+    }
+    .top-bar h1 {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+    .top-bar .back-btn {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 6px 14px;
+      border-radius: 20px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: all 0.3s;
+    }
+    .top-bar .back-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    .info-panel {
+      position: fixed;
+      top: 70px;
+      right: 20px;
+      width: 280px;
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      z-index: 100;
+      display: none;
+    }
+    .info-panel h3 {
+      color: #ff6b35;
+      margin-bottom: 10px;
+      font-size: 1.1rem;
+    }
+    .info-panel .dish {
+      background: #fff3e0;
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin: 8px 0;
+      color: #e65100;
+      font-size: 0.9rem;
+    }
+    .info-panel .rating {
+      color: #ffc107;
+      font-weight: 600;
+      margin: 6px 0;
+    }
+    .info-panel .desc {
+      color: #666;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+    .controls-hint {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      z-index: 100;
+    }
+    .controls-hint p {
+      margin: 4px 0;
+    }
+    .error-panel {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      z-index: 200;
+      display: none;
+    }
+    .error-panel h2 { color: #dc3545; margin-bottom: 10px; }
+    .error-panel p { color: #666; margin-bottom: 20px; }
+    .error-panel button {
+      background: #ff6b35;
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    @media (max-width: 768px) {
+      .info-panel { width: 220px; padding: 14px; right: 10px; top: 60px; }
+      .controls-hint { font-size: 0.75rem; padding: 8px 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <h1>🍜 三维美食街</h1>
+    <a href="../index.html" class="back-btn">← 返回首页</a>
+  </div>
+
+  <div id="scene-container"></div>
+
+  <div class="info-panel" id="info-panel">
+    <h3 id="stall-name">档口名称</h3>
+    <div class="dish" id="stall-dish">招牌菜</div>
+    <div class="rating" id="stall-rating">⭐ 评分</div>
+    <div class="desc" id="stall-desc">描述</div>
+  </div>
+
+  <div class="controls-hint">
+    <p>🖱️ 左键拖拽：旋转视角</p>
+    <p>⚙️ 滚轮：缩放远近</p>
+    <p>➡️ 右键拖拽：平移场景</p>
+    <p>👆 点击建筑：查看详情</p>
+  </div>
+
+  <div class="error-panel" id="error-panel">
+    <h2>😢 加载失败</h2>
+    <p>三维场景加载失败，请检查网络连接</p>
+    <button onclick="location.reload()">重新加载</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script>
+    // 档口数据（与主页面一致）
+    var stallsData = [
+      { name: "川湘小炒", dish: "鱼香肉丝饭", rating: 4.7, desc: "正宗川湘风味，麻辣鲜香", color: 0xff6b35, position: [-8, 0, -6] },
+      { name: "粤式烧腊", dish: "叉烧饭", rating: 4.5, desc: "港式烧腊，皮脆肉嫩", color: 0xffc107, position: [-4, 0, -6] },
+      { name: "兰州拉面", dish: "牛肉拉面", rating: 4.6, desc: "手工现拉，汤鲜味美", color: 0xffa500, position: [0, 0, -6] },
+      { name: "麻辣香锅", dish: "荤素搭配香锅", rating: 4.8, desc: "自选食材，排队王", color: 0xdc3545, position: [4, 0, -6] },
+      { name: "韩式拌饭", dish: "石锅牛肉拌饭", rating: 4.6, desc: "正宗韩式风味", color: 0x6f42c1, position: [8, 0, -6] },
+      { name: "沙县小吃", dish: "蒸饺+馄饨", rating: 4.3, desc: "便宜实惠，经典小吃", color: 0x28a745, position: [-8, 0, 6] },
+      { name: "黄焖鸡米饭", dish: "黄焖鸡米饭", rating: 4.4, desc: "鸡肉鲜嫩，汤汁浓郁", color: 0xfd7e14, position: [-4, 0, 6] },
+      { name: "日式拉面", dish: "豚骨拉面", rating: 4.5, desc: "浓郁豚骨汤底", color: 0x17a2b8, position: [0, 0, 6] },
+      { name: "奶茶甜品站", dish: "珍珠奶茶", rating: 4.9, desc: "现做奶茶，人气高", color: 0xff85a3, position: [4, 0, 6] },
+      { name: "水果捞", dish: "什锦水果捞", rating: 4.8, desc: "新鲜水果配酸奶", color: 0x20c997, position: [8, 0, 6] }
+    ];
+
+    var scene, camera, renderer, controls;
+    var buildings = [];
+    var raycaster = new THREE.Raycaster();
+    var mouse = new THREE.Vector2();
+    var mouseDownPos = new THREE.Vector2();
+    var container = document.getElementById('scene-container');
+
+    init();
+    animate();
+
+    function init() {
+      try {
+        // 场景
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87ceeb);
+        scene.fog = new THREE.Fog(0x87ceeb, 30, 80);
+
+        // 相机
+        camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 200);
+        camera.position.set(0, 15, 20);
+
+        // 渲染器
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        container.appendChild(renderer.domElement);
+
+        // 轨道控制器
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.minDistance = 8;
+        controls.maxDistance = 50;
+        controls.maxPolarAngle = Math.PI / 2 - 0.1;
+        controls.target.set(0, 2, 0);
+
+        // 光照
+        var ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+
+        var directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(15, 25, 15);
+        directionalLight.castShadow = true;
+        directionalLight.shadow.mapSize.width = 2048;
+        directionalLight.shadow.mapSize.height = 2048;
+        directionalLight.shadow.camera.left = -20;
+        directionalLight.shadow.camera.right = 20;
+        directionalLight.shadow.camera.top = 20;
+        directionalLight.shadow.camera.bottom = -20;
+        scene.add(directionalLight);
+
+        // 地面
+        createGround();
+
+        // 街道
+        createStreets();
+
+        // 创建档口建筑
+        createFoodStalls();
+
+        // 装饰（树木、路灯）
+        createDecorations();
+
+        // 天空云朵
+        createClouds();
+
+        // 事件监听
+        window.addEventListener('resize', onWindowResize);
+        renderer.domElement.addEventListener('mousedown', onMouseDown);
+        renderer.domElement.addEventListener('mouseup', onMouseUp);
+        renderer.domElement.addEventListener('touchstart', onTouchStart, { passive: false });
+        renderer.domElement.addEventListener('touchend', onTouchEnd, { passive: false });
+
+      } catch (err) {
+        console.error('三维场景初始化失败:', err);
+        document.getElementById('error-panel').style.display = 'block';
+      }
+    }
+
+    function createGround() {
+      var groundGeo = new THREE.PlaneGeometry(60, 40);
+      var groundMat = new THREE.MeshStandardMaterial({ 
+        color: 0x7cb342,
+        roughness: 0.9
+      });
+      var ground = new THREE.Mesh(groundGeo, groundMat);
+      ground.rotation.x = -Math.PI / 2;
+      ground.receiveShadow = true;
+      scene.add(ground);
+    }
+
+    function createStreets() {
+      // 主街道（横向）
+      var streetGeo = new THREE.PlaneGeometry(60, 5);
+      var streetMat = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.8 });
+      var street1 = new THREE.Mesh(streetGeo, streetMat);
+      street1.rotation.x = -Math.PI / 2;
+      street1.position.y = 0.01;
+      street1.position.z = 0;
+      street1.receiveShadow = true;
+      scene.add(street1);
+
+      // 街道边线
+      for (var i = -12; i <= 12; i += 3) {
+        var lineGeo = new THREE.PlaneGeometry(1.5, 0.15);
+        var lineMat = new THREE.MeshStandardMaterial({ color: 0xffff00 });
+        var line = new THREE.Mesh(lineGeo, lineMat);
+        line.rotation.x = -Math.PI / 2;
+        line.position.set(i, 0.02, 0);
+        scene.add(line);
+      }
+    }
+
+    function createFoodStalls() {
+      stallsData.forEach(function(stall, index) {
+        var group = new THREE.Group();
+
+        // 档口主体（小屋形状）
+        var bodyGeo = new THREE.BoxGeometry(2.5, 2.5, 2.5);
+        var bodyMat = new THREE.MeshStandardMaterial({ 
+          color: stall.color,
+          roughness: 0.6
+        });
+        var body = new THREE.Mesh(bodyGeo, bodyMat);
+        body.position.y = 1.25;
+        body.castShadow = true;
+        body.receiveShadow = true;
+        group.add(body);
+
+        // 屋顶
+        var roofGeo = new THREE.ConeGeometry(2, 1.2, 4);
+        var roofMat = new THREE.MeshStandardMaterial({ 
+          color: 0x8b4513,
+          roughness: 0.7
+        });
+        var roof = new THREE.Mesh(roofGeo, roofMat);
+        roof.position.y = 3.1;
+        roof.rotation.y = Math.PI / 4;
+        roof.castShadow = true;
+        group.add(roof);
+
+        // 招牌（前面的小牌子）
+        var signGeo = new THREE.BoxGeometry(2, 0.5, 0.1);
+        var signMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+        var sign = new THREE.Mesh(signGeo, signMat);
+        sign.position.set(0, 2.2, 1.3);
+        group.add(sign);
+
+        // 门窗
+        var doorGeo = new THREE.BoxGeometry(0.7, 1.2, 0.1);
+        var doorMat = new THREE.MeshStandardMaterial({ color: 0x4a2c0a });
+        var door = new THREE.Mesh(doorGeo, doorMat);
+        door.position.set(0, 0.6, 1.3);
+        group.add(door);
+
+        // 窗户
+        var windowGeo = new THREE.BoxGeometry(0.5, 0.5, 0.1);
+        var windowMat = new THREE.MeshStandardMaterial({ 
+          color: 0x87ceeb,
+          emissive: 0x4488aa,
+          emissiveIntensity: 0.3
+        });
+        var win1 = new THREE.Mesh(windowGeo, windowMat);
+        win1.position.set(0.7, 1.8, 1.3);
+        group.add(win1);
+        var win2 = new THREE.Mesh(windowGeo, windowMat);
+        win2.position.set(-0.7, 1.8, 1.3);
+        group.add(win2);
+
+        // 展示食物（顶部的大碗）
+        var bowlGeo = new THREE.CylinderGeometry(0.5, 0.4, 0.3, 16);
+        var bowlMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+        var bowl = new THREE.Mesh(bowlGeo, bowlMat);
+        bowl.position.set(0, 4.2, 0);
+        bowl.castShadow = true;
+        group.add(bowl);
+
+        var foodGeo = new THREE.SphereGeometry(0.4, 16, 16);
+        var foodMat = new THREE.MeshStandardMaterial({ color: 0xff8c42 });
+        var food = new THREE.Mesh(foodGeo, foodMat);
+        food.position.set(0, 4.5, 0);
+        food.scale.set(1, 0.5, 1);
+        food.castShadow = true;
+        group.add(food);
+
+        // 位置
+        group.position.set(stall.position[0], stall.position[1], stall.position[2]);
+        
+        // 朝向街道
+        if (stall.position[2] > 0) {
+          group.rotation.y = Math.PI;
+        }
+
+        // 存储数据
+        group.userData = {
+          index: index,
+          name: stall.name,
+          dish: stall.dish,
+          rating: stall.rating,
+          desc: stall.desc,
+          baseY: stall.position[1]
+        };
+
+        // 收集所有mesh用于射线检测
+        group.traverse(function(child) {
+          if (child.isMesh) {
+            child.userData.parentGroup = group;
+          }
+        });
+
+        buildings.push(group);
+        scene.add(group);
+      });
+    }
+
+    function createDecorations() {
+      // 树木
+      var treePositions = [
+        [-12, -10], [12, -10], [-12, 10], [12, 10],
+        [-14, 0], [14, 0], [-10, -3], [10, 3],
+        [-6, -10], [6, -10], [-6, 10], [6, 10]
+      ];
+
+      treePositions.forEach(function(pos) {
+        var tree = createTree();
+        tree.position.set(pos[0], 0, pos[1]);
+        scene.add(tree);
+      });
+
+      // 路灯
+      var lampPositions = [[-10, 0], [0, 0], [10, 0]];
+      lampPositions.forEach(function(pos) {
+        var lamp = createLamp();
+        lamp.position.set(pos[0], 0, pos[1]);
+        scene.add(lamp);
+      });
+    }
+
+    function createTree() {
+      var group = new THREE.Group();
+      
+      var trunkGeo = new THREE.CylinderGeometry(0.15, 0.2, 1.5, 8);
+      var trunkMat = new THREE.MeshStandardMaterial({ color: 0x8b4513 });
+      var trunk = new THREE.Mesh(trunkGeo, trunkMat);
+      trunk.position.y = 0.75;
+      trunk.castShadow = true;
+      group.add(trunk);
+
+      var leavesGeo = new THREE.ConeGeometry(1, 2, 8);
+      var leavesMat = new THREE.MeshStandardMaterial({ color: 0x2e7d32 });
+      var leaves = new THREE.Mesh(leavesGeo, leavesMat);
+      leaves.position.y = 2.2;
+      leaves.castShadow = true;
+      group.add(leaves);
+
+      var leaves2Geo = new THREE.ConeGeometry(0.8, 1.5, 8);
+      var leaves2 = new THREE.Mesh(leaves2Geo, leavesMat);
+      leaves2.position.y = 3;
+      leaves2.castShadow = true;
+      group.add(leaves2);
+
+      return group;
+    }
+
+    function createLamp() {
+      var group = new THREE.Group();
+
+      var poleGeo = new THREE.CylinderGeometry(0.05, 0.08, 3, 8);
+      var poleMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+      var pole = new THREE.Mesh(poleGeo, poleMat);
+      pole.position.y = 1.5;
+      pole.castShadow = true;
+      group.add(pole);
+
+      var bulbGeo = new THREE.SphereGeometry(0.2, 16, 16);
+      var bulbMat = new THREE.MeshStandardMaterial({ 
+        color: 0xffff88,
+        emissive: 0xffff44,
+        emissiveIntensity: 0.8
+      });
+      var bulb = new THREE.Mesh(bulbGeo, bulbMat);
+      bulb.position.y = 3.1;
+      group.add(bulb);
+
+      var topGeo = new THREE.ConeGeometry(0.25, 0.15, 16);
+      var topMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+      var top = new THREE.Mesh(topGeo, topMat);
+      top.position.y = 3.35;
+      group.add(top);
+
+      return group;
+    }
+
+    function createClouds() {
+      for (var i = 0; i < 8; i++) {
+        var cloudGroup = new THREE.Group();
+        var cloudMat = new THREE.MeshStandardMaterial({ 
+          color: 0xffffff,
+          transparent: true,
+          opacity: 0.8
+        });
+        
+        for (var j = 0; j < 4; j++) {
+          var sphereGeo = new THREE.SphereGeometry(1 + Math.random() * 0.8, 8, 8);
+          var sphere = new THREE.Mesh(sphereGeo, cloudMat);
+          sphere.position.set(j * 1.2 - 2, Math.random() * 0.5, Math.random() * 0.5);
+          cloudGroup.add(sphere);
+        }
+        
+        cloudGroup.position.set(
+          (Math.random() - 0.5) * 60,
+          18 + Math.random() * 5,
+          (Math.random() - 0.5) * 30
+        );
+        cloudGroup.userData.speed = 0.002 + Math.random() * 0.003;
+        scene.add(cloudGroup);
+      }
+    }
+
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    function onMouseDown(event) {
+      mouseDownPos.x = event.clientX;
+      mouseDownPos.y = event.clientY;
+    }
+
+    function onMouseUp(event) {
+      // 判断是否为点击（移动距离小于5像素）
+      var dx = event.clientX - mouseDownPos.x;
+      var dy = event.clientY - mouseDownPos.y;
+      if (Math.sqrt(dx * dx + dy * dy) > 5) return;
+
+      handleClick(event.clientX, event.clientY);
+    }
+
+    function onTouchStart(event) {
+      if (event.touches.length === 1) {
+        mouseDownPos.x = event.touches[0].clientX;
+        mouseDownPos.y = event.touches[0].clientY;
+      }
+    }
+
+    function onTouchEnd(event) {
+      if (event.changedTouches.length === 1) {
+        var dx = event.changedTouches[0].clientX - mouseDownPos.x;
+        var dy = event.changedTouches[0].clientY - mouseDownPos.y;
+        if (Math.sqrt(dx * dx + dy * dy) < 10) {
+          handleClick(event.changedTouches[0].clientX, event.changedTouches[0].clientY);
+        }
+      }
+    }
+
+    function handleClick(clientX, clientY) {
+      var rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((clientX - rect.left) / container.clientWidth) * 2 - 1;
+      mouse.y = -((clientY - rect.top) / container.clientHeight) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      
+      var allMeshes = [];
+      buildings.forEach(function(building) {
+        building.traverse(function(child) {
+          if (child.isMesh) allMeshes.push(child);
+        });
+      });
+
+      var intersects = raycaster.intersectObjects(allMeshes);
+      
+      if (intersects.length > 0) {
+        var mesh = intersects[0].object;
+        var group = mesh.userData.parentGroup;
+        if (group && group.userData.name) {
+          showBuildingInfo(group.userData);
+          animateBuildingClick(group);
+        }
+      } else {
+        document.getElementById('info-panel').style.display = 'none';
+      }
+    }
+
+    function showBuildingInfo(data) {
+      var panel = document.getElementById('info-panel');
+      document.getElementById('stall-name').textContent = data.name;
+      document.getElementById('stall-dish').textContent = '招牌：' + data.dish;
+      document.getElementById('stall-rating').textContent = '⭐ ' + data.rating.toFixed(1) + ' 分';
+      document.getElementById('stall-desc').textContent = data.desc;
+      panel.style.display = 'block';
+    }
+
+    function animateBuildingClick(group) {
+      var originalY = group.userData.baseY;
+      var time = 0;
+      function bounce() {
+        time += 0.15;
+        group.position.y = originalY + Math.sin(time) * 0.3 * Math.exp(-time * 0.8);
+        if (time < 3) {
+          requestAnimationFrame(bounce);
+        } else {
+          group.position.y = originalY;
+        }
+      }
+      bounce();
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+
+      // 云朵飘动
+      scene.children.forEach(function(obj) {
+        if (obj.userData && obj.userData.speed) {
+          obj.position.x += obj.userData.speed;
+          if (obj.position.x > 35) obj.position.x = -35;
+        }
+      });
+
+      // 食物旋转
+      buildings.forEach(function(building) {
+        building.traverse(function(child) {
+          if (child.geometry && child.geometry.type === 'SphereGeometry' && child.position.y > 4) {
+            child.rotation.y += 0.01;
+          }
+        });
+      });
+
+      renderer.render(scene, camera);
+    }
+  </script>
+</body>
+</html>
