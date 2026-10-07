@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>校园美食中心 - 信息与数据展示</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- 顶部导航 -->
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-food fixed-top">
+      <div class="container">
+        <a class="navbar-brand fw-bold" href="#home">
+          <span class="brand-icon">🍜</span> 校园美食中心
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item"><a class="nav-link active" href="#home">首页</a></li>
+            <li class="nav-item"><a class="nav-link" href="#stalls">档口查询</a></li>
+            <li class="nav-item"><a class="nav-link" href="#stats">营养统计</a></li>
+            <li class="nav-item"><a class="nav-link" href="three-d/scene.html">三维美食街</a></li>
+            <li class="nav-item"><a class="nav-link" href="#about">关于</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <!-- 首页 Hero -->
+    <section id="home" class="hero-section">
+      <div class="hero-overlay"></div>
+      <div class="container hero-content">
+        <div class="row align-items-center min-vh-75">
+          <div class="col-lg-8 text-white">
+            <h1 class="display-4 fw-bold mb-3">校园美食中心</h1>
+            <p class="lead mb-4">汇聚南北风味，满足你的味蕾<br>第一食堂 · 第二食堂 · 清真食堂 全覆盖</p>
+            <div class="d-flex flex-wrap gap-3">
+              <a href="#stalls" class="btn btn-food btn-lg">浏览档口</a>
+              <a href="three-d/scene.html" class="btn btn-outline-light btn-lg">三维美食街</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 数据加载错误提示 -->
+    <div id="error-banner" class="alert alert-warning alert-dismissible fade show m-3 d-none" role="alert">
+      <strong>提示：</strong> <span id="error-message">数据加载失败</span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- 功能卡片 -->
+    <section class="py-5 bg-light">
+      <div class="container">
+        <div class="row g-4">
+          <div class="col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm card-hover">
+              <div class="card-body text-center">
+                <div class="feature-icon">🍱</div>
+                <h5 class="card-title">12个档口</h5>
+                <p class="card-text text-muted">覆盖中餐、面食、日韩、小吃等7大品类</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm card-hover">
+              <div class="card-body text-center">
+                <div class="feature-icon">⭐</div>
+                <h5 class="card-title">评分参考</h5>
+                <p class="card-text text-muted">真实学生评分，帮你选对美食</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm card-hover">
+              <div class="card-body text-center">
+                <div class="feature-icon">📊</div>
+                <h5 class="card-title">营养统计</h5>
+                <p class="card-text text-muted">各品类热量、蛋白质、脂肪一目了然</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm card-hover">
+              <div class="card-body text-center">
+                <div class="feature-icon">🏗️</div>
+                <h5 class="card-title">三维美食街</h5>
+                <p class="card-text text-muted">Three.js 打造沉浸式美食街体验</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 档口查询 -->
+    <section id="stalls" class="py-5">
+      <div class="container">
+        <div class="text-center mb-5">
+          <h2 class="fw-bold">档口查询</h2>
+          <p class="text-muted">按食堂、品类、状态筛选，或直接搜索你想吃的</p>
+        </div>
+
+        <!-- 筛选区 -->
+        <div class="row g-3 mb-4">
+          <div class="col-md-4">
+            <input type="text" id="search-input" class="form-control" placeholder="搜索档口名称或菜品...">
+          </div>
+          <div class="col-md-4">
+            <div class="d-flex flex-wrap gap-2" id="canteen-filter">
+              <button class="btn btn-sm btn-food active" data-canteen="all">全部食堂</button>
+              <button class="btn btn-sm btn-outline-food" data-canteen="第一食堂">第一食堂</button>
+              <button class="btn btn-sm btn-outline-food" data-canteen="第二食堂">第二食堂</button>
+              <button class="btn btn-sm btn-outline-food" data-canteen="清真食堂">清真食堂</button>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="d-flex flex-wrap gap-2" id="category-filter">
+              <button class="btn btn-sm btn-secondary active" data-category="all">全部品类</button>
+              <button class="btn btn-sm btn-outline-secondary" data-category="中餐">中餐</button>
+              <button class="btn btn-sm btn-outline-secondary" data-category="面食">面食</button>
+              <button class="btn btn-sm btn-outline-secondary" data-category="日韩料理">日韩</button>
+              <button class="btn btn-sm btn-outline-secondary" data-category="饮品甜点">饮品</button>
+              <button class="btn btn-sm btn-outline-secondary" data-category="清真">清真</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 状态筛选 -->
+        <div class="d-flex gap-2 mb-4" id="status-filter">
+          <button class="btn btn-sm btn-success active" data-status="all">全部状态</button>
+          <button class="btn btn-sm btn-outline-success" data-status="open">营业中</button>
+          <button class="btn btn-sm btn-outline-danger" data-status="closed">已打烊</button>
+        </div>
+
+        <!-- 档口列表 -->
+        <div id="stalls-grid" class="row g-4">
+          <!-- 动态生成 -->
+        </div>
+
+        <!-- 空状态 -->
+        <div id="empty-state" class="text-center py-5 d-none">
+          <div class="display-1 mb-3">🍽️</div>
+          <h4>没有找到符合条件的档口</h4>
+          <p class="text-muted">试试其他筛选条件吧</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 营养统计 -->
+    <section id="stats" class="py-5 bg-light">
+      <div class="container">
+        <div class="text-center mb-5">
+          <h2 class="fw-bold">营养数据统计</h2>
+          <p class="text-muted">各品类营养成分对比，科学搭配健康饮食</p>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-lg-8">
+            <div class="card shadow-sm">
+              <div class="card-body">
+                <h5 class="card-title">各品类营养成分对比</h5>
+                <div id="nutrition-chart" style="height: 400px;"></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="card shadow-sm">
+              <div class="card-body">
+                <h5 class="card-title">各食堂人气排行</h5>
+                <div id="popular-chart" style="height: 400px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 关于 -->
+    <section id="about" class="py-5">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 mx-auto text-center">
+            <h2 class="fw-bold mb-4">关于校园美食中心</h2>
+            <p class="lead text-muted mb-4">
+              校园美食中心是一个为学生打造的食堂信息展示平台，收录了学校三个食堂共12个特色档口的详细信息，
+              包括招牌菜、价格区间、评分、营业状态等。同时提供营养成分数据分析和三维美食街导览，
+              帮助同学们快速找到心仪的美食。
+            </p>
+            <div class="d-flex justify-content-center gap-4 flex-wrap">
+              <div class="text-center">
+                <h3 class="text-food fw-bold">3</h3>
+                <p class="text-muted">食堂</p>
+              </div>
+              <div class="text-center">
+                <h3 class="text-food fw-bold">12</h3>
+                <p class="text-muted">档口</p>
+              </div>
+              <div class="text-center">
+                <h3 class="text-food fw-bold">7</h3>
+                <p class="text-muted">品类</p>
+              </div>
+              <div class="text-center">
+                <h3 class="text-food fw-bold">4.6</h3>
+                <p class="text-muted">平均评分</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="bg-dark text-white py-4">
+    <div class="container text-center">
+      <p class="mb-0">🍜 校园美食中心 · 信息与数据展示课程期末作业</p>
+      <p class="mb-0 text-muted small">技术栈：Bootstrap 5 + jQuery + ECharts + Three.js</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.0/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

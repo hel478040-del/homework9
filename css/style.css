@@ -1,0 +1,251 @@
+/* 校园美食中心 - 自定义样式 */
+
+:root {
+  --food-primary: #ff6b35;
+  --food-primary-dark: #e55a2b;
+  --food-secondary: #ffc107;
+  --food-success: #28a745;
+  --food-bg: #fff8f0;
+}
+
+body {
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  padding-top: 56px;
+}
+
+/* 导航栏 */
+.bg-food {
+  background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%) !important;
+  box-shadow: 0 2px 10px rgba(255, 107, 53, 0.3);
+}
+
+.navbar-dark .navbar-nav .nav-link {
+  color: rgba(255, 255, 255, 0.9);
+  transition: all 0.3s;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover,
+.navbar-dark .navbar-nav .nav-link.active {
+  color: #fff;
+  font-weight: 500;
+}
+
+.brand-icon {
+  font-size: 1.5rem;
+  margin-right: 0.5rem;
+}
+
+/* 按钮 */
+.btn-food {
+  background-color: var(--food-primary);
+  border-color: var(--food-primary);
+  color: white;
+}
+
+.btn-food:hover {
+  background-color: var(--food-primary-dark);
+  border-color: var(--food-primary-dark);
+  color: white;
+}
+
+.btn-food.active {
+  background-color: var(--food-primary-dark);
+  border-color: var(--food-primary-dark);
+}
+
+.btn-outline-food {
+  color: var(--food-primary);
+  border-color: var(--food-primary);
+}
+
+.btn-outline-food:hover,
+.btn-outline-food.active {
+  background-color: var(--food-primary);
+  border-color: var(--food-primary);
+  color: white;
+}
+
+.text-food {
+  color: var(--food-primary);
+}
+
+/* Hero 区域 */
+.hero-section {
+  position: relative;
+  background: linear-gradient(135deg, #ff6b35 0%, #ff9a56 50%, #ffc107 100%);
+  min-height: 75vh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(255,255,255,0.15) 0%, transparent 40%);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+.min-vh-75 {
+  min-height: 75vh;
+}
+
+/* 功能卡片 */
+.feature-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.card-hover {
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* 档口卡片 */
+.stall-card {
+  transition: transform 0.3s, box-shadow 0.3s;
+  border: none;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.stall-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+}
+
+.stall-card .card-header {
+  background: linear-gradient(135deg, #ff6b35, #ff8c42);
+  color: white;
+  border-bottom: none;
+  padding: 1rem 1.25rem;
+}
+
+.stall-card .stall-name {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.stall-card .stall-status {
+  font-size: 0.8rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+}
+
+.status-open {
+  background-color: rgba(40, 167, 69, 0.9);
+}
+
+.status-closed {
+  background-color: rgba(220, 53, 69, 0.9);
+}
+
+.stall-card .signature-dish {
+  background-color: #fff3e0;
+  color: #e65100;
+  padding: 0.5rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  margin-bottom: 0.8rem;
+}
+
+.stall-card .rating {
+  color: #ffc107;
+  font-weight: 600;
+}
+
+.stall-card .price-range {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.stall-card .tag {
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 12px;
+  background-color: #e9ecef;
+  color: #495057;
+  margin-right: 0.3rem;
+  margin-bottom: 0.3rem;
+}
+
+/* 筛选按钮 */
+#canteen-filter .btn,
+#category-filter .btn,
+#status-filter .btn {
+  border-radius: 20px;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.85rem;
+}
+
+/* 空状态 */
+#empty-state {
+  color: #adb5bd;
+}
+
+/* 区块标题 */
+section h2 {
+  position: relative;
+  padding-bottom: 0.8rem;
+}
+
+section h2::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #ff6b35, #ffc107);
+  border-radius: 2px;
+}
+
+/* 页脚 */
+footer {
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+}
+
+/* 滚动平滑 */
+html {
+  scroll-behavior: smooth;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .hero-section {
+    min-height: 60vh;
+  }
+  
+  .display-4 {
+    font-size: 2rem;
+  }
+  
+  .lead {
+    font-size: 1rem;
+  }
+  
+  #canteen-filter,
+  #category-filter,
+  #status-filter {
+    justify-content: center;
+  }
+  
+  .feature-icon {
+    font-size: 2.5rem;
+  }
+}
